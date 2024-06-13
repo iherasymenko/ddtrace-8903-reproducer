@@ -1,8 +1,8 @@
 # Configuration
 
-The issue can _reliably_ be reproduced on a `c6a.8xlarge` AWS EC2 virtual machine with Amazon Linux installed.
+One might experience luck reproducing the issue on a local machine but if it does not work, please use the following AWS EC2 instance type.
 
-One might experience luck reproducing the issue on a local machine but if it does not work, please use the aforementioned AWS EC2 instance.
+The issue can _reliably_ be reproduced on a `c6a.8xlarge` AWS EC2 virtual machine with the Amazon Linux installed.
 
 # Steps to reproduce
 
@@ -55,7 +55,31 @@ curl -v http://localhost:9999 --max-time 2
 [2024-06-13 22:33:12 +0000] [7] [INFO] Shutting down: Master
 ```
 
-Gunicorn stops gracefully.
+Gunicorn stops gracefully. Sometimes it might print a stack trace, but this does not affect the functionality.
+
+```
+^C[2024-06-13 22:46:47 +0000] [7] [INFO] Handling signal: int
+[2024-06-13 22:46:47 +0000] [14] [INFO] Worker exiting (pid: 14)
+Traceback (most recent call last):
+  File "/root/.cache/pypoetry/virtualenvs/reproducer-9TtSrW0h-py3.12/lib/python3.12/site-packages/gevent/monkey.py", line 849, in _shutdown
+    sleep()
+  File "/root/.cache/pypoetry/virtualenvs/reproducer-9TtSrW0h-py3.12/lib/python3.12/site-packages/gevent/hub.py", line 159, in sleep
+    waiter.get()
+  File "src/gevent/_waiter.py", line 143, in gevent._gevent_c_waiter.Waiter.get
+  File "src/gevent/_waiter.py", line 154, in gevent._gevent_c_waiter.Waiter.get
+  File "src/gevent/_greenlet_primitives.py", line 61, in gevent._gevent_c_greenlet_primitives.SwitchOutGreenletWithLoop.switch
+  File "src/gevent/_greenlet_primitives.py", line 61, in gevent._gevent_c_greenlet_primitives.SwitchOutGreenletWithLoop.switch
+  File "src/gevent/_greenlet_primitives.py", line 65, in gevent._gevent_c_greenlet_primitives.SwitchOutGreenletWithLoop.switch
+  File "src/gevent/_gevent_c_greenlet_primitives.pxd", line 35, in gevent._gevent_c_greenlet_primitives._greenlet_switch
+  File "src/gevent/greenlet.py", line 908, in gevent._gevent_cgreenlet.Greenlet.run
+  File "/root/.cache/pypoetry/virtualenvs/reproducer-9TtSrW0h-py3.12/lib/python3.12/site-packages/gunicorn/workers/base.py", line 198, in handle_quit
+    sys.exit(0)
+SystemExit: 0
+2024-06-13T22:46:47Z <greenlet.greenlet object at 0x7ff18575e980 (otid=0x7ff1897ddda0) current active started main> failed with SystemExit
+
+[2024-06-13 22:46:48 +0000] [7] [INFO] Shutting down: Master
+
+```
 
 ## 3.12.3 or 3.12.4 with ddtrace-run (does not work, the app hangs)
 
@@ -74,6 +98,7 @@ If everything is fine, you should see 'App initialized.' printed to the console 
 ```
 
 The message `App initialized.` is **not** printed to the console.
+
 3) Run the following command:
 ```
 curl http://localhost:9999 --max-time 2
